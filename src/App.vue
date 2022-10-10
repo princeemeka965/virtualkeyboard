@@ -1,53 +1,63 @@
-<script setup></script>
-
 <template>
-  <header>
-    <img
-      alt="Vue logo"
-      class="logo"
-      src="@/assets/logo.svg"
-      width="125"
-      height="125"
-    />
+  <div class="w-full flex justify-center p-3">
+    <h1 class="text-5xl font-black">Virtual KeyBoard</h1>
+  </div>
+  <div class="flex w-full h-full flex-col justify-center p-10">
+    <textarea
+      class="use-keyboard-input w-1/3 h-40 border inset-11"
+      style="margin: 0 auto"
+      ref="textarea"
+      @focus="openKeyBoard = true"
+      :value="textAreaVal"
+    ></textarea>
 
-    <div class="wrapper"></div>
-  </header>
+    <KeyBoard
+      v-if="openKeyBoard"
+      @closeKey="closeKeyBoard($event)"
+      @handleKeyEvent="displayData($event)"
+      @removeFocus="removeInputFocus($event)"
+    />
+  </div>
 </template>
+
+<script>
+import KeyBoard from "./components/KeyBoard.vue";
+
+export default {
+  components: {
+    KeyBoard,
+  },
+  data() {
+    return {
+      openKeyBoard: false,
+      textAreaVal: "",
+    };
+  },
+
+  methods: {
+    removeInputFocus(value) {
+      if (value) {
+        this.$refs.textarea[0].blur();
+      }
+    },
+
+    closeKeyBoard(data) {
+      this.openKeyBoard = data;
+    },
+
+    displayData(data) {
+      this.textAreaVal += data;
+    },
+  },
+
+  mounted() {},
+};
+</script>
 
 <style scoped>
 header {
   line-height: 1.5;
   max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
-}
-
-nav {
-  width: 100%;
-  font-size: 12px;
-  text-align: center;
-  margin-top: 2rem;
-}
-
-nav a.router-link-exact-active {
-  color: var(--color-text);
-}
-
-nav a.router-link-exact-active:hover {
-  background-color: transparent;
-}
-
-nav a {
-  display: inline-block;
-  padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
-}
-
-nav a:first-of-type {
-  border: 0;
 }
 
 @media (min-width: 1024px) {
@@ -57,23 +67,10 @@ nav a:first-of-type {
     padding-right: calc(var(--section-gap) / 2);
   }
 
-  .logo {
-    margin: 0 2rem 0 0;
-  }
-
   header .wrapper {
     display: flex;
     place-items: flex-start;
     flex-wrap: wrap;
-  }
-
-  nav {
-    text-align: left;
-    margin-left: -1rem;
-    font-size: 1rem;
-
-    padding: 1rem 0;
-    margin-top: 1rem;
   }
 }
 </style>
