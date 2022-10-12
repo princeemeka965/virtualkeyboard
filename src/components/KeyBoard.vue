@@ -1,18 +1,20 @@
 <template>
-  <div class="fixed left-0 bottom-0 w-full p-2 keyboard">
-    <div class="flex w-full justify-center">
-      <div class="w-3/5">
-        <div class="text-center">
-          <button
-            v-for="(keyData, index) in keysElem"
-            :key="index"
-            class="keyboard__key text-white outline-none cursor-pointer inline-flex items-center justify-center"
-            :class="setKeyClass(keyData)"
-            :ref="keyData"
-            @click="handleClick(keyData)"
-          >
-            {{ keyData }}
-          </button>
+  <div>
+    <div class="fixed left-0 bottom-0 w-full p-2 keyboard">
+      <div class="flex w-full justify-center">
+        <div class="w-3/5">
+          <div class="text-center">
+            <button
+              v-for="(keyData, index) in keysElem"
+              :key="index"
+              class="keyboard__key text-white outline-none cursor-pointer inline-flex items-center justify-center"
+              :class="setKeyClass(keyData)"
+              :ref="keyData"
+              @click="handleClick(keyData)"
+            >
+              {{ keyData }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -21,6 +23,13 @@
 
 <script>
 export default {
+  props: {
+    inputProps: {
+      type: String,
+      default: "",
+    },
+  },
+
   data() {
     return {
       capsLock: false,
@@ -39,7 +48,7 @@ export default {
         "0",
         "-",
         "=",
-        "backspace",
+        "Backspace",
         "tab",
         "q",
         "w",
@@ -54,7 +63,7 @@ export default {
         "[",
         "]",
         "#",
-        "caps",
+        "CapsLock",
         "a",
         "s",
         "d",
@@ -66,7 +75,7 @@ export default {
         "l",
         ";",
         "'",
-        "enter",
+        "Enter",
         "done",
         "z",
         "x",
@@ -79,17 +88,17 @@ export default {
         ".",
         "/",
         "question",
-        "shift",
+        "Shift",
         "space",
       ],
       specialKeys: [
-        "backspace",
-        "caps",
+        "Backspace",
+        "CapsLock",
         "tab",
-        "enter",
+        "Enter",
         "done",
         "question",
-        "shift",
+        "Shift",
         "space",
       ],
       numberKeys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
@@ -98,10 +107,15 @@ export default {
   },
 
   watch: {
+    inputProps() {
+      console.log(this.$refs[`${this.inputProps}`]);
+      this.$refs[`${this.inputProps}`][0].setProperty();
+    },
+
     capsLock() {
       this.capsLock
-        ? this.$refs.caps[0].classList.add("keyboard__key--active")
-        : this.$refs.caps[0].classList.remove("keyboard__key--active");
+        ? this.$refs.CapsLock[0].classList.add("keyboard__key--active")
+        : this.$refs.CapsLock[0].classList.remove("keyboard__key--active");
 
       /**
        * Convert Lower case to upper case if capsLock is on
@@ -112,12 +126,16 @@ export default {
         if (!this.specialKeys.includes(element)) {
           return element.toUpperCase();
         } else {
-          return element.toLowerCase();
+          return element;
         }
       });
 
       const lower = this.keysElem.map((element) => {
-        return element.toLowerCase();
+        if (!this.specialKeys.includes(element)) {
+          return element.toLowerCase();
+        } else {
+          return element;
+        }
       });
 
       this.capsLock ? (this.keysElem = upper) : (this.keysElem = lower);
@@ -125,31 +143,31 @@ export default {
 
     shiftKey() {
       this.shiftKey
-        ? this.$refs.shift[0].classList.add("keyboard__key--active")
-        : this.$refs.shift[0].classList.remove("keyboard__key--active");
+        ? this.$refs.Shift[0].classList.add("keyboard__key--active")
+        : this.$refs.Shift[0].classList.remove("keyboard__key--active");
 
       /**
-       * Convert Lower case to upper case if shiftKey is on
-       * Convert Upper case to lower case when shiftKey is off
+       * Convert Numbers to Symbols if shiftKey is on
+       * Convert Symbols back to Numbers when shiftKey is off
        */
 
-      const upper = this.keysElem.map((element, index) => {
+      const symbols = this.keysElem.map((element, index) => {
         if (this.numberKeys.includes(element)) {
           return this.symbolKeys[index - 1];
         } else {
-          return element.toLowerCase();
+          return element;
         }
       });
 
-      const lower = this.keysElem.map((element, index) => {
+      const numbers = this.keysElem.map((element, index) => {
         if (this.symbolKeys.includes(element)) {
           return this.numberKeys[index - 1];
         } else {
-          return element.toLowerCase();
+          return element;
         }
       });
 
-      this.shiftKey ? (this.keysElem = upper) : (this.keysElem = lower);
+      this.shiftKey ? (this.keysElem = symbols) : (this.keysElem = numbers);
       this.capsLock = this.shiftKey;
     },
   },
@@ -160,16 +178,16 @@ export default {
         case "tab":
           return "keyboard__key--wide";
 
-        case "shift":
+        case "Shift":
           return "keyboard__key--wide keyboard__key--activatable";
 
-        case "backspace":
+        case "Backspace":
           return "keyboard__key--wide";
 
-        case "caps":
+        case "CapsLock":
           return "keyboard__key--wide keyboard__key--activatable";
 
-        case "enter":
+        case "Enter":
           return "keyboard__key--wide";
 
         case "space":
@@ -193,11 +211,19 @@ export default {
           this.$emit("closeKey", false);
           break;
 
-        case "caps":
+        case "Enter":
+          this.$emit("handleKeyEvent", "\n");
+          break;
+
+        case "space":
+          this.$emit("handleKeyEvent", " ");
+          break;
+
+        case "CapsLock":
           this.capsLock = !this.capsLock;
           break;
 
-        case "shift":
+        case "Shift":
           this.shiftKey = !this.shiftKey;
           break;
 
@@ -209,12 +235,12 @@ export default {
   },
 
   mounted() {
-    this.$refs.backspace[0].innerHTML = `<i class="material-icons">backspace</i>`;
-    this.$refs.tab[0].innerHTML = `<i class="material-icons">keyboard_tab</i>`;
-    this.$refs.enter[0].innerHTML = `<i class="material-icons">keyboard_return</i>`;
+    this.$refs.Backspace[0].innerHTML = `<i class="material-icons">backspace</i>`;
+    this.$refs.tab[0].innerHTML = `<i class="material-icons" title="Tab">keyboard_tab</i>`;
+    this.$refs.Enter[0].innerHTML = `<i class="material-icons">keyboard_return</i>`;
     this.$refs.question[0].innerHTML = `?`;
-    this.$refs.shift[0].innerHTML = `<i class="material-icons" title="Shift">arrow_upward</i>`;
-    this.$refs.caps[0].innerHTML = `<i class="material-icons">lock</i>`;
+    this.$refs.Shift[0].innerHTML = `<i class="material-icons" title="Shift">arrow_upward</i>`;
+    this.$refs.CapsLock[0].innerHTML = `<i class="material-icons" title="CapsLock">lock</i>`;
     this.$refs.done[0].innerHTML = `<i class="material-icons" title="Close Keyboard">close</i>`;
     this.$refs.space[0].innerHTML = `<i class="material-icons">space_bar</i>`;
   },

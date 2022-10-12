@@ -8,11 +8,13 @@
       style="margin: 0 auto"
       ref="textarea"
       @focus="openKeyBoard = true"
-      :value="textAreaVal"
+      v-model="textAreaVal"
+      @keyup="keyEvent($event)"
     ></textarea>
 
     <KeyBoard
       v-if="openKeyBoard"
+      :input-props="this.externalKey"
       @closeKey="closeKeyBoard($event)"
       @handleKeyEvent="displayData($event)"
       @removeFocus="removeInputFocus($event)"
@@ -31,6 +33,7 @@ export default {
     return {
       openKeyBoard: false,
       textAreaVal: "",
+      externalKey: "",
     };
   },
 
@@ -47,6 +50,14 @@ export default {
 
     displayData(data) {
       this.textAreaVal += data;
+    },
+
+    keyEvent(value) {
+      if (value.key === " ") {
+        this.externalKey = value.code.toLowerCase();
+      } else {
+        this.externalKey = value.key;
+      }
     },
   },
 
