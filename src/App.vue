@@ -3,21 +3,9 @@
     <h1 class="text-5xl font-black">Virtual KeyBoard</h1>
   </div>
   <div class="flex w-full h-full flex-col justify-center p-10">
-    <textarea
-      class="use-keyboard-input w-1/3 h-40 border inset-11"
-      style="margin: 0 auto"
-      ref="textarea"
-      @focus="openKeyBoard = true"
-      v-model="textAreaVal"
-      @keyup="keyEvent($event)"
-    ></textarea>
-
     <KeyBoard
-      v-if="openKeyBoard"
-      :input-props="this.externalKey"
-      @closeKey="closeKeyBoard($event)"
-      @handleKeyEvent="displayData($event)"
-      @removeFocus="removeInputFocus($event)"
+      v-model="textAreaVal"
+      :className="`use-keyboard-input w-1/3 h-40 border inset-11`"
     />
   </div>
 </template>
@@ -31,35 +19,11 @@ export default {
   },
   data() {
     return {
-      openKeyBoard: false,
       textAreaVal: "",
-      externalKey: "",
     };
   },
 
-  methods: {
-    removeInputFocus(value) {
-      if (value) {
-        this.$refs.textarea[0].blur();
-      }
-    },
-
-    closeKeyBoard(data) {
-      this.openKeyBoard = data;
-    },
-
-    displayData(data) {
-      this.textAreaVal += data;
-    },
-
-    keyEvent(value) {
-      if (value.key === " ") {
-        this.externalKey = value.code.toLowerCase();
-      } else {
-        this.externalKey = value.key;
-      }
-    },
-  },
+  methods: {},
 
   mounted() {},
 };

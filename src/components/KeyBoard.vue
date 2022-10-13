@@ -1,6 +1,15 @@
 <template>
-  <div>
-    <div class="fixed left-0 bottom-0 w-full p-2 keyboard">
+  <div class="w-full flex">
+    <textarea
+      :class="`${className}`"
+      style="margin: 0 auto"
+      ref="textarea"
+      @focus="openKeyBoard = true"
+      v-model="textAreaVal"
+      @keyup="keyEvent($event)"
+    ></textarea>
+
+    <div class="fixed left-0 bottom-0 w-full p-2 keyboard" v-if="openKeyBoard">
       <div class="flex w-full justify-center">
         <div class="w-3/5">
           <div class="text-center">
@@ -10,9 +19,20 @@
               class="keyboard__key text-white outline-none cursor-pointer inline-flex items-center justify-center"
               :class="setKeyClass(keyData)"
               :ref="keyData"
+              :title="`${keyData}`"
               @click="handleClick(keyData)"
             >
-              {{ keyData }}
+              <i
+                v-if="iconKeys.includes(keyData)"
+                :class="
+                  keyData === 'Windows' ? 'fa fa-windows' : 'material-icons'
+                "
+              >
+                {{ keyData !== "Windows" ? setIcons(keyData) : "" }}
+              </i>
+              <span v-else>
+                {{ keyData }}
+              </span>
             </button>
           </div>
         </div>
@@ -22,9 +42,27 @@
 </template>
 
 <script>
+/**
+ * KeysElem Array displays ALL keys in the virtual KeyBoard.
+ */
+
+/**
+ * SpecialKeys Array displays keys that are not affected by any
+ * action carried out on the virtual KeyBoard.
+ */
+
+/**
+ * IconKeys Array displays keys that require icons to be displayed.
+ */
+
+/**
+ * NumberKeys Array displays keys that will be REPLACED by SymbolKeys Array
+ * when Shift is Active.
+ */
+
 export default {
   props: {
-    inputProps: {
+    className: {
       type: String,
       default: "",
     },
@@ -32,6 +70,8 @@ export default {
 
   data() {
     return {
+      textAreaVal: "",
+      openKeyBoard: false,
       capsLock: false,
       shiftKey: false,
       keysElem: [
@@ -49,7 +89,7 @@ export default {
         "-",
         "=",
         "Backspace",
-        "tab",
+        "Tab",
         "q",
         "w",
         "e",
@@ -76,7 +116,7 @@ export default {
         ";",
         "'",
         "Enter",
-        "done",
+        "Close",
         "z",
         "x",
         "c",
@@ -87,31 +127,82 @@ export default {
         ",",
         ".",
         "/",
-        "question",
+        "?",
         "Shift",
-        "space",
+        "Ctrl",
+        "Windows",
+        "Space",
+        "Alt",
+        "Ctrl",
       ],
       specialKeys: [
         "Backspace",
         "CapsLock",
-        "tab",
+        "Tab",
         "Enter",
-        "done",
-        "question",
+        "Close",
         "Shift",
-        "space",
+        "Space",
+        "Windows",
+        "Alt",
+        "Ctrl",
       ],
-      numberKeys: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "="],
-      symbolKeys: ["!", "''", "£", "$", "%", "^", "&", "*", "(", ")", "_", "+"],
+      iconKeys: [
+        "Backspace",
+        "CapsLock",
+        "Tab",
+        "Enter",
+        "Close",
+        "Shift",
+        "Space",
+        "Windows",
+      ],
+      numberKeys: [
+        "1",
+        "2",
+        "3",
+        "4",
+        "5",
+        "6",
+        "7",
+        "8",
+        "9",
+        "0",
+        "-",
+        "=",
+        "[",
+        "]",
+        ";",
+        "#",
+        "'",
+        ",",
+        ".",
+      ],
+      symbolKeys: [
+        "!",
+        "''",
+        "£",
+        "$",
+        "%",
+        "^",
+        "&",
+        "*",
+        "(",
+        ")",
+        "_",
+        "+",
+        "{",
+        "}",
+        ":",
+        "`",
+        "@",
+        "<",
+        ">",
+      ],
     };
   },
 
   watch: {
-    inputProps() {
-      console.log(this.$refs[`${this.inputProps}`]);
-      this.$refs[`${this.inputProps}`][0].setProperty();
-    },
-
     capsLock() {
       this.capsLock
         ? this.$refs.CapsLock[0].classList.add("keyboard__key--active")
@@ -120,6 +211,7 @@ export default {
       /**
        * Convert Lower case to upper case if capsLock is on
        * Convert Upper case to lower case when capsLock is off
+       * S
        */
 
       const upper = this.keysElem.map((element) => {
@@ -151,17 +243,17 @@ export default {
        * Convert Symbols back to Numbers when shiftKey is off
        */
 
-      const symbols = this.keysElem.map((element, index) => {
+      const symbols = this.keysElem.map((element) => {
         if (this.numberKeys.includes(element)) {
-          return this.symbolKeys[index - 1];
+          return this.symbolKeys[this.numberKeys.indexOf(element)];
         } else {
           return element;
         }
       });
 
-      const numbers = this.keysElem.map((element, index) => {
+      const numbers = this.keysElem.map((element) => {
         if (this.symbolKeys.includes(element)) {
-          return this.numberKeys[index - 1];
+          return this.numberKeys[this.symbolKeys.indexOf(element)];
         } else {
           return element;
         }
@@ -175,7 +267,7 @@ export default {
   methods: {
     setKeyClass(keys) {
       switch (keys) {
-        case "tab":
+        case "Tab":
           return "keyboard__key--wide";
 
         case "Shift":
@@ -190,11 +282,39 @@ export default {
         case "Enter":
           return "keyboard__key--wide";
 
-        case "space":
+        case "Space":
           return "keyboard__key--extra-wide";
 
-        case "done":
+        case "Close":
           return "keyboard__key--wide";
+
+        default:
+          return "";
+      }
+    },
+
+    setIcons(keys) {
+      switch (keys) {
+        case "Tab":
+          return "keyboard_tab";
+
+        case "Shift":
+          return "arrow_upward";
+
+        case "Backspace":
+          return "backspace";
+
+        case "CapsLock":
+          return "lock";
+
+        case "Enter":
+          return "keyboard_return";
+
+        case "Space Bar":
+          return "space_bar";
+
+        case "Close":
+          return "close";
 
         default:
           return "";
@@ -203,47 +323,91 @@ export default {
 
     handleClick(keyData) {
       switch (keyData) {
-        case "tab":
-          this.$emit("removeFocus", true);
+        case "Tab":
+          this.$refs.Tab[0].blur();
           break;
 
-        case "done":
-          this.$emit("closeKey", false);
+        case "Close":
+          // Closes virtual KeyBoard
+          this.openKeyBoard = false;
+          // Remove CapsLock, if on
+          this.capsLock = false;
+          // Remove Shift, if on
+          this.shiftKey = false;
           break;
 
         case "Enter":
-          this.$emit("handleKeyEvent", "\n");
+          // Enters a new line
+          this.setInputData("\n");
+          this.$refs.Enter[0].blur();
           break;
 
-        case "space":
-          this.$emit("handleKeyEvent", " ");
+        case "Space":
+          this.setInputData(" ");
+          this.$refs.Space[0].blur();
           break;
 
         case "CapsLock":
           this.capsLock = !this.capsLock;
+          this.$refs.CapsLock[0].blur();
           break;
 
         case "Shift":
           this.shiftKey = !this.shiftKey;
+          this.$refs.Shift[0].blur();
+          break;
+
+        case "Backspace":
+          this.deleteInputData();
+          this.$refs.Backspace[0].blur();
           break;
 
         default:
-          this.$emit("handleKeyEvent", keyData);
+          this.setInputData(keyData);
           break;
       }
+
+      // Focus back to the textarea field after every action taken
+      this.$refs.textarea.focus();
+    },
+
+    setInputData(data) {
+      if (data !== "Windows" && data !== "Alt" && data !== "Ctrl") {
+        this.textAreaVal += data;
+      }
+    },
+
+    deleteInputData() {
+      this.textAreaVal = this.textAreaVal.substring(
+        0,
+        this.textAreaVal.length - 1
+      );
+    },
+
+    keyEvent(value) {
+      // Captures when keys from external Keyboard (Device Key) are clicked
+      // value.key === " " captures when space Bar is clicked
+      const refNode = value.key === " " ? value.code : value.key;
+      this.highlightKey(refNode);
+    },
+
+    highlightKey(node) {
+      // Highlight the key on the virtual KeyBoard
+      this.$refs[`${node}`][0].focus();
+
+      // Remove focus on the key after 1 milliseconds
+      // Place focus back to the textarea field
+      setTimeout(() => {
+        this.$refs[`${node}`][0].blur();
+        this.$refs.textarea.focus();
+      }, 100);
+
+      node === "CapsLock" ? (this.capsLock = !this.capsLock) : "";
+      node === "Shift" ? (this.shiftKey = !this.shiftKey) : "";
     },
   },
 
-  mounted() {
-    this.$refs.Backspace[0].innerHTML = `<i class="material-icons">backspace</i>`;
-    this.$refs.tab[0].innerHTML = `<i class="material-icons" title="Tab">keyboard_tab</i>`;
-    this.$refs.Enter[0].innerHTML = `<i class="material-icons">keyboard_return</i>`;
-    this.$refs.question[0].innerHTML = `?`;
-    this.$refs.Shift[0].innerHTML = `<i class="material-icons" title="Shift">arrow_upward</i>`;
-    this.$refs.CapsLock[0].innerHTML = `<i class="material-icons" title="CapsLock">lock</i>`;
-    this.$refs.done[0].innerHTML = `<i class="material-icons" title="Close Keyboard">close</i>`;
-    this.$refs.space[0].innerHTML = `<i class="material-icons">space_bar</i>`;
-  },
+  mounted() {},
 };
 </script>
 
@@ -258,8 +422,7 @@ export default {
 .keyboard__key {
   height: 45px;
   width: 6%;
-  max-width: 90px;
-  margin: 3px;
+  margin: 0.2%;
   border-radius: 4px;
   border: none;
   background: rgba(255, 255, 255, 0.2);
@@ -271,8 +434,12 @@ export default {
   background: rgba(255, 255, 255, 0.12);
 }
 
+.keyboard__key:focus {
+  background: rgba(255, 255, 255, 0.12);
+}
+
 .keyboard__key--wide {
-  width: 12%;
+  width: 12.5%;
 }
 
 .keyboard__key--extra-wide {
