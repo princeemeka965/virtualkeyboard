@@ -7,6 +7,7 @@
       @focus="openKeyBoard = true"
       v-model="textAreaVal"
       @keyup="keyEvent($event)"
+      @input="$emit('update:modelValue', $event.target.value)"
     ></textarea>
 
     <div class="fixed left-0 bottom-0 w-full p-2 keyboard" v-if="openKeyBoard">
@@ -375,6 +376,7 @@ export default {
       if (data !== "Windows" && data !== "Alt" && data !== "Ctrl") {
         this.textAreaVal += data;
       }
+      this.$emit("update:modelValue", this.textAreaVal);
     },
 
     deleteInputData() {
@@ -382,6 +384,7 @@ export default {
         0,
         this.textAreaVal.length - 1
       );
+      this.$emit("update:modelValue", this.textAreaVal);
     },
 
     keyEvent(value) {

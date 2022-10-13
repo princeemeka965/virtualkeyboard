@@ -23,6 +23,12 @@ export default {
     };
   },
 
+  watch: {
+    textAreaVal() {
+      console.log(this.textAreaVal);
+    },
+  },
+
   methods: {},
 
   mounted() {},
